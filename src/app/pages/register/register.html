@@ -1,0 +1,76 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card tarjeta shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h3 mb-1">Crear cuenta</h1>
+        <p class="text-muted">Regístrate para crear grupos y repartir gastos.</p>
+
+        @if (error()) {
+          <div class="alert alert-danger">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-control"
+              formControlName="nombre"
+              autocomplete="name"
+              [class.is-invalid]="invalido('nombre')"
+            />
+            <div class="invalid-feedback">Escribe tu nombre (mínimo 2 letras).</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-control"
+              formControlName="email"
+              autocomplete="email"
+              [class.is-invalid]="invalido('email')"
+            />
+            <div class="invalid-feedback">Escribe un email válido.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              class="form-control"
+              formControlName="password"
+              autocomplete="new-password"
+              [class.is-invalid]="invalido('password')"
+            />
+            <div class="invalid-feedback">Mínimo 6 caracteres.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="repetir" class="form-label">Repite la contraseña</label>
+            <input
+              id="repetir"
+              type="password"
+              class="form-control"
+              formControlName="repetir"
+              autocomplete="new-password"
+              [class.is-invalid]="invalido('repetir') || noCoinciden"
+            />
+            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+          </div>
+
+          <button type="submit" class="btn btn-principal w-100" [disabled]="cargando()">
+            @if (cargando()) { Creando cuenta... } @else { Crear cuenta }
+          </button>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+          ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
