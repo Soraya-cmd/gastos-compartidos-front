@@ -1,0 +1,38 @@
+:root {
+  --color-principal: #8b3a62;
+  --color-principal-oscuro: #722f50;
+  --color-fondo: #faf6f8;
+}
+
+body {
+  background: var(--color-fondo);
+}
+
+
+.barra {
+  background: var(--color-principal);
+}
+.barra .navbar-brand,
+.barra .navbar-text,
+.barra .nav-link {
+  color: #fff;
+}
+
+
+.tarjeta {
+  border: 0;
+  border-radius: 1rem;
+}
+
+
+.btn-principal {
+  background: var(--color-principal);
+  border-color: var(--color-principal);
+  color: #fff;
+}
+.btn-principal:hover,
+.btn-principal:focus {
+  background: var(--color-principal-oscuro);
+  border-color: var(--color-principal-oscuro);
+  color: #fff;
+}
