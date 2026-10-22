@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -25,6 +25,7 @@ export class DetalleGrupo {
   private gruposService = inject(GruposService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
 
   
   private id = Number(this.route.snapshot.paramMap.get('id'));
@@ -85,7 +86,12 @@ export class DetalleGrupo {
         );
         this.cargando.set(false);
       },
-    });
+    })
+  
+    // Cada 5 segundos miramos si hay mensajes nuevos.
+    // Al salir de la pantalla, se detiene el temporizador.
+    const temporizador = setInterval(() => this.refrescarMensajes(), 5000);
+    this.destroyRef.onDestroy(() => clearInterval(temporizador));
   }
 
   
@@ -155,6 +161,28 @@ export class DetalleGrupo {
       },
     });
   }
+
+  /** Como cargarMensajes, pero en silencio: sin spinner ni errores, y solo repinta si hay algo nuevo. */
+  private refrescarMensajes(): void {
+    // No preguntamos si la pestaña está oculta, si estamos enviando o si el grupo no ha cargado
+    if (document.hidden || this.enviando() || !this.grupo()) {
+      return;
+    }
+    this.gruposService.listarMensajes(this.id).subscribe({
+      next: (lista) => {
+        const actual = this.mensajes();
+        const hayNuevos =
+          lista.length !== actual.length || lista.at(-1)?.id !== actual.at(-1)?.id;
+        if (hayNuevos) {
+          this.mensajes.set(lista);
+          this.bajarAlFinal();
+        }
+      },
+      error: () => {}, // si falla un refresco, lo ignoramos: el siguiente lo reintenta
+    });
+  }
+
+
 
   enviarMensaje(): void {
     const contenido = this.texto.value.trim();
