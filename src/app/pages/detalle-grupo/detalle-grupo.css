@@ -1,0 +1,15 @@
+.cifra {
+  color: var(--color-principal);
+}
+
+.barra-reparto {
+  background-color: var(--color-principal);
+}
+
+.alerta-flotante {
+  position: fixed;
+  top: 4.5rem;
+  right: 1rem;
+  z-index: 1050;
+  max-width: 420px;
+}
