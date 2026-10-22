@@ -1,0 +1,50 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card tarjeta shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h3 mb-1">Iniciar sesión</h1>
+        <p class="text-muted">Entra para ver tus grupos de gastos.</p>
+
+        @if (error()) {
+          <div class="alert alert-danger">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-control"
+              formControlName="email"
+              autocomplete="email"
+              [class.is-invalid]="invalido('email')"
+            />
+            <div class="invalid-feedback">Escribe un email válido.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              class="form-control"
+              formControlName="password"
+              autocomplete="current-password"
+              [class.is-invalid]="invalido('password')"
+            />
+            <div class="invalid-feedback">Escribe tu contraseña.</div>
+          </div>
+
+          <button type="submit" class="btn btn-principal w-100" [disabled]="cargando()">
+            @if (cargando()) { Entrando... } @else { Entrar }
+          </button>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+          ¿No tienes cuenta? <a routerLink="/registro">Crea una</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

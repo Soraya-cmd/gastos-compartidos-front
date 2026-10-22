@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">Mis grupos</h1>
+    <p class="text-muted mb-0">Bodas y despedidas en las que participas.</p>
+  </div>
+  <a class="btn btn-principal" routerLink="/grupos/nuevo">Nuevo grupo</a>
+</div>
+
+@if (cargando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border" role="status"></div>
+    <p class="text-muted mt-2">Cargando...</p>
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+} @else if (grupos().length === 0) {
+  <div class="card tarjeta shadow-sm text-center p-5">
+    <h2 class="h5">Todavía no tienes ningún grupo</h2>
+    <p class="text-muted">Crea el primero para repartir los gastos de una boda o una despedida.</p>
+    <div><a class="btn btn-principal" routerLink="/grupos/nuevo">Crear mi primer grupo</a></div>
+  </div>
+} @else {
+  <div class="row g-3">
+    @for (g of grupos(); track g.id) {
+      <div class="col-12 col-md-6 col-lg-4">
+        <a class="text-decoration-none text-reset" [routerLink]="['/grupos', g.id]">
+          <div class="card tarjeta shadow-sm h-100 grupo-tarjeta">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h2 class="h5 mb-0">{{ g.titulo }}</h2>
+                <span
+                  class="badge"
+                  [class.text-bg-dark]="g.rol === 'creador'"
+                  [class.text-bg-secondary]="g.rol === 'invitado'"
+                >
+                  {{ g.rol === 'creador' ? 'Creador' : 'Invitado' }}
+                </span>
+              </div>
+              <p class="text-muted small mb-3">{{ g.descripcion || 'Sin descripción' }}</p>
+              <p class="fs-4 fw-semibold mb-0 total">{{ g.total | currency: 'EUR' }}</p>
+              <p class="text-muted small mb-0">en total</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+}

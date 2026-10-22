@@ -1,0 +1,116 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-9">
+    <div class="card tarjeta shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h3 mb-1">Nuevo grupo</h1>
+        <p class="text-muted">
+          Cuéntanos de qué evento se trata y cuáles son los gastos. Después podrás invitar a las
+          demás personas y repartir los porcentajes.
+        </p>
+
+        @if (error()) {
+          <div class="alert alert-danger">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input
+              id="titulo"
+              type="text"
+              class="form-control"
+              formControlName="titulo"
+              placeholder="Por ejemplo: Despedida de Laura"
+              [class.is-invalid]="invalido(form.controls.titulo)"
+            />
+            <div class="invalid-feedback">Escribe un título (mínimo 2 letras).</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea
+              id="descripcion"
+              class="form-control"
+              rows="2"
+              formControlName="descripcion"
+              placeholder="Por ejemplo: Fin de semana en Valencia"
+            ></textarea>
+          </div>
+
+          <h2 class="h5">Gastos</h2>
+          <p class="text-muted small">Añade cada gasto del evento con su categoría y su importe.</p>
+
+          <div formArrayName="gastos">
+            @for (g of gastos.controls; track g; let i = $index) {
+              <div class="row g-2 align-items-start mb-2" [formGroupName]="i">
+                <div class="col-12 col-md-3">
+                  <select class="form-select" formControlName="categoria" aria-label="Categoría">
+                    @for (c of categorias; track c.valor) {
+                      <option [value]="c.valor">{{ c.texto }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="concepto"
+                    placeholder="Concepto (cena, hotel...)"
+                    aria-label="Concepto"
+                    [class.is-invalid]="invalido(g.controls.concepto)"
+                  />
+                  <div class="invalid-feedback">Escribe el concepto.</div>
+                </div>
+
+                <div class="col-8 col-md-3">
+                  <div class="input-group has-validation">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      class="form-control"
+                      formControlName="importe"
+                      placeholder="0,00"
+                      aria-label="Importe"
+                      [class.is-invalid]="invalido(g.controls.importe)"
+                    />
+                    <span class="input-group-text">€</span>
+                    <div class="invalid-feedback">Importe mayor que 0.</div>
+                  </div>
+                </div>
+
+                <div class="col-4 col-md-2 text-end">
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    (click)="quitarGasto(i)"
+                    [disabled]="gastos.length === 1"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <button type="button" class="btn btn-outline-secondary btn-sm mt-1" (click)="anadirGasto()">
+            + Añadir gasto
+          </button>
+
+          <div class="d-flex justify-content-between align-items-center border-top mt-4 pt-3">
+            <span class="text-muted">Total del grupo</span>
+            <span class="fs-4 fw-semibold total-grupo">{{ total() | currency: 'EUR' }}</span>
+          </div>
+
+          <div class="d-flex gap-2 justify-content-end mt-4">
+            <a class="btn btn-outline-secondary" routerLink="/grupos">Cancelar</a>
+            <button type="submit" class="btn btn-principal" [disabled]="cargando()">
+              @if (cargando()) { Creando... } @else { Crear grupo }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
