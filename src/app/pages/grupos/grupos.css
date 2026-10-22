@@ -1,0 +1,12 @@
+.grupo-tarjeta {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.grupo-tarjeta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(139, 58, 98, 0.18) !important;
+}
+
+.total {
+  color: var(--color-principal);
+}
