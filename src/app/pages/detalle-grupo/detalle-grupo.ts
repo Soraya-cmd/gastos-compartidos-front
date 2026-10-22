@@ -18,13 +18,13 @@ export class DetalleGrupo {
   private gruposService = inject(GruposService);
   private route = inject(ActivatedRoute);
 
- 
+  
   private id = Number(this.route.snapshot.paramMap.get('id'));
 
   grupo = signal<GrupoDetalle | null>(null);
   cargando = signal(true);
   errorCarga = signal('');
-  mensaje = signal(''); 
+  mensaje = signal(''); // error de la última acción (invitar, pagar...)
 
   categorias: { valor: Categoria; texto: string }[] = [
     { valor: 'cena', texto: 'Cena' },
@@ -56,6 +56,7 @@ export class DetalleGrupo {
     this.gruposService.detalle(this.id).subscribe({
       next: (g) => {
         this.grupo.set(g);
+        this.sugerirPorcentaje();
         this.cargando.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -69,7 +70,7 @@ export class DetalleGrupo {
     });
   }
 
-  
+ 
   etiqueta(categoria: string): string {
     return this.categorias.find((c) => c.valor === categoria)?.texto ?? categoria;
   }
@@ -78,20 +79,31 @@ export class DetalleGrupo {
     return control.invalid && (control.touched || control.dirty);
   }
 
+  
+  private sugerirPorcentaje(): void {
+    const g = this.grupo();
+    const control = this.formInvitar.controls.porcentaje;
+    if (!g || control.dirty) {
+      return;
+    }
+    const libre = Math.round((100 - g.porcentaje_asignado) * 100) / 100;
+    control.setValue(libre > 0 ? libre : null);
+  }
 
-
+  
   private ejecutar(accion: Observable<GrupoDetalle>, alTerminar?: () => void): void {
     this.mensaje.set('');
     accion.subscribe({
       next: (g) => {
         this.grupo.set(g);
         alTerminar?.();
+        this.sugerirPorcentaje();
       },
       error: (err: HttpErrorResponse) => this.mensaje.set(this.textoError(err)),
     });
   }
 
- 
+  
   private textoError(err: HttpErrorResponse): string {
     const detalle = err.error?.detail;
     if (typeof detalle === 'string') {
@@ -103,7 +115,7 @@ export class DetalleGrupo {
     return 'Revisa los datos: alguno no es válido.';
   }
 
-
+  
   invitar(): void {
     if (this.formInvitar.invalid) {
       this.formInvitar.markAllAsTouched();
@@ -122,6 +134,18 @@ export class DetalleGrupo {
       return;
     }
     this.ejecutar(this.gruposService.cambiarPorcentaje(this.id, miembro.usuario_id, porcentaje));
+  }
+
+  repartirIgual(): void {
+    if (confirm('Se repartirá el 100 % a partes iguales entre todos los miembros. ¿Continuar?')) {
+      this.ejecutar(this.gruposService.repartirIgual(this.id));
+    }
+  }
+
+  quitarMiembro(miembro: Miembro): void {
+    if (confirm(`¿Quitar a ${miembro.nombre} del grupo?`)) {
+      this.ejecutar(this.gruposService.quitarMiembro(this.id, miembro.usuario_id));
+    }
   }
 
   anadirGasto(): void {

@@ -102,6 +102,14 @@ export class GruposService {
     return this.http.put<GrupoDetalle>(`${this.base}/${id}/miembros/${usuarioId}`, { porcentaje });
   }
 
+  repartirIgual(id: number): Observable<GrupoDetalle> {
+    return this.http.post<GrupoDetalle>(`${this.base}/${id}/repartir-igual`, {});
+  }
+
+    quitarMiembro(id: number, usuarioId: number): Observable<GrupoDetalle> {
+    return this.http.delete<GrupoDetalle>(`${this.base}/${id}/miembros/${usuarioId}`);
+  }
+
   anadirGasto(id: number, gasto: GastoNuevo): Observable<GrupoDetalle> {
     return this.http.post<GrupoDetalle>(`${this.base}/${id}/gastos`, gasto);
   }
