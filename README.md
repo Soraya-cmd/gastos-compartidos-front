@@ -1,4 +1,4 @@
- Compartir gastos · Frontend (Angular)
+# Compartir gastos · Frontend (Angular)
 
 Interfaz web del proyecto final del **Máster en Programación y Desarrollo Web Full Stack**.
 Permite registrarse, crear grupos de gastos para una boda o despedida, invitar a otras
