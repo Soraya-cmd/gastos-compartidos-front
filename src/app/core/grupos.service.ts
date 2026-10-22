@@ -42,6 +42,15 @@ export interface Pago {
   nota: string | null;
 }
 
+export interface Mensaje {
+  id: number;
+  usuario_id: number;
+  nombre: string;
+  contenido: string;
+  creado_en: string;
+}
+
+
 export interface GrupoDetalle {
   id: number;
   titulo: string;
@@ -125,4 +134,14 @@ export class GruposService {
   borrarPago(id: number, pagoId: number): Observable<GrupoDetalle> {
     return this.http.delete<GrupoDetalle>(`${this.base}/${id}/pagos/${pagoId}`);
   }
+
+
+  listarMensajes(id: number): Observable<Mensaje[]> {
+    return this.http.get<Mensaje[]>(`${this.base}/${id}/mensajes`);
+  }
+
+  enviarMensaje(id: number, contenido: string): Observable<Mensaje> {
+    return this.http.post<Mensaje>(`${this.base}/${id}/mensajes`, { contenido });
+  }
+
 }

@@ -389,4 +389,58 @@
       </div>
     </div>
   </div>
+
+
+
+  <div class="card tarjeta shadow-sm mt-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Mensajes del grupo</h2>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary"
+          (click)="cargarMensajes()"
+          [disabled]="cargandoChat()"
+        >
+          Actualizar
+        </button>
+      </div>
+
+      @if (errorChat()) {
+        <div class="alert alert-danger py-2">{{ errorChat() }}</div>
+      }
+
+      <div id="lista-mensajes" class="lista-mensajes mb-3">
+        @if (mensajes().length === 0 && !cargandoChat()) {
+          <p class="text-muted text-center my-4">Todavía no hay mensajes. ¡Escribe el primero!</p>
+        }
+        @for (m of mensajes(); track m.id) {
+          <div class="d-flex mb-2" [class.justify-content-end]="esMio(m)">
+            <div class="burbuja" [class.burbuja-mia]="esMio(m)">
+              <div class="burbuja-cabecera">
+                <strong>{{ esMio(m) ? 'Tú' : m.nombre }}</strong>
+                <span class="hora ms-2">{{ m.creado_en | date: 'dd/MM HH:mm' }}</span>
+              </div>
+              <div class="burbuja-texto">{{ m.contenido }}</div>
+            </div>
+          </div>
+        }
+      </div>
+
+        <form (submit)="$event.preventDefault(); enviarMensaje()" class="d-flex gap-2">>
+        <input
+          type="text"
+          class="form-control"
+          [formControl]="texto"
+          placeholder="Escribe un mensaje..."
+          maxlength="1000"
+          aria-label="Mensaje"
+        />
+        <button type="submit" class="btn btn-principal" [disabled]="enviando() || !texto.value.trim()">
+          Enviar
+        </button>
+      </form>
+    </div>
+  </div>
+
 }

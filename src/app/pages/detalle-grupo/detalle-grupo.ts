@@ -1,11 +1,18 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
-import { Categoria, GrupoDetalle, GruposService, Miembro } from '../../core/grupos.service';
+import { AuthService } from '../../core/auth.service';
+import { Categoria, GrupoDetalle, GruposService, Mensaje, Miembro } from '../../core/grupos.service';
 
 @Component({
   selector: 'app-detalle-grupo',
@@ -16,6 +23,7 @@ import { Categoria, GrupoDetalle, GruposService, Miembro } from '../../core/grup
 export class DetalleGrupo {
   private fb = inject(FormBuilder);
   private gruposService = inject(GruposService);
+  private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
 
   
@@ -24,7 +32,14 @@ export class DetalleGrupo {
   grupo = signal<GrupoDetalle | null>(null);
   cargando = signal(true);
   errorCarga = signal('');
-  mensaje = signal(''); // error de la última acción (invitar, pagar...)
+  mensaje = signal(''); 
+
+  
+  mensajes = signal<Mensaje[]>([]);
+  cargandoChat = signal(false);
+  enviando = signal(false);
+  errorChat = signal('');
+  texto = new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] });
 
   categorias: { valor: Categoria; texto: string }[] = [
     { valor: 'cena', texto: 'Cena' },
@@ -53,11 +68,14 @@ export class DetalleGrupo {
   });
 
   constructor() {
+    
     this.gruposService.detalle(this.id).subscribe({
       next: (g) => {
         this.grupo.set(g);
         this.sugerirPorcentaje();
         this.cargando.set(false);
+        
+        this.cargarMensajes();
       },
       error: (err: HttpErrorResponse) => {
         this.errorCarga.set(
@@ -70,7 +88,7 @@ export class DetalleGrupo {
     });
   }
 
- 
+  
   etiqueta(categoria: string): string {
     return this.categorias.find((c) => c.valor === categoria)?.texto ?? categoria;
   }
@@ -116,6 +134,59 @@ export class DetalleGrupo {
   }
 
   
+  
+  esMio(m: Mensaje): boolean {
+    return m.usuario_id === this.auth.usuario()?.id;
+  }
+
+  
+  cargarMensajes(): void {
+    this.errorChat.set('');
+    this.cargandoChat.set(true);
+    this.gruposService.listarMensajes(this.id).subscribe({
+      next: (lista) => {
+        this.mensajes.set(lista);
+        this.cargandoChat.set(false);
+        this.bajarAlFinal();
+      },
+      error: () => {
+        this.errorChat.set('No se pudieron cargar los mensajes.');
+        this.cargandoChat.set(false);
+      },
+    });
+  }
+
+  enviarMensaje(): void {
+    const contenido = this.texto.value.trim();
+    if (!contenido || this.enviando()) {
+      return;
+    }
+    this.enviando.set(true);
+    this.errorChat.set('');
+    this.gruposService.enviarMensaje(this.id, contenido).subscribe({
+      next: () => {
+        this.texto.reset();
+        this.enviando.set(false);
+        this.cargarMensajes(); // recargamos para ver el mensaje nuevo
+      },
+      error: (err: HttpErrorResponse) => {
+        this.enviando.set(false);
+        this.errorChat.set(this.textoError(err));
+      },
+    });
+  }
+
+  
+  private bajarAlFinal(): void {
+    setTimeout(() => {
+      const lista = document.getElementById('lista-mensajes');
+      if (lista) {
+        lista.scrollTop = lista.scrollHeight;
+      }
+    });
+  }
+
+ 
   invitar(): void {
     if (this.formInvitar.invalid) {
       this.formInvitar.markAllAsTouched();
